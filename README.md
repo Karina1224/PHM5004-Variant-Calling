@@ -1,9 +1,7 @@
 # PHM5004 Group Project
 ## Option 1: Multi-sample Variant Calling Pipeline
 
-**Member A — Infrastructure & Serial Baseline**
-NUS HPC (PBS/Torque) | GRCh38 | 20 samples from 1000 Genomes Project
-Deadline: Sat 11 Apr 2026
+**Karina
 
 ---
 
