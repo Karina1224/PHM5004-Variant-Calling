@@ -1,6 +1,5 @@
 #!/bin/bash
 # =============================================================================
-# SCRIPT: 04_serial_pipeline.pbs
 # PURPOSE: Run full variant calling pipeline SERIALLY on all 20 samples
 #          This is the BASELINE for benchmark comparison against parallel pipeline
 # QUEUE:   serial
