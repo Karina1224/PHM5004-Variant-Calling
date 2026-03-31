@@ -1,6 +1,5 @@
 #!/bin/bash
 # =============================================================================
-# SCRIPT: 05_verify_downloads.sh
 # PURPOSE: Check all 20 CRAM files downloaded correctly (non-zero size)
 # RUN ON:  Login node after Job 03_download_cram.pbs completes
 # USAGE:   bash 05_verify_downloads.sh
