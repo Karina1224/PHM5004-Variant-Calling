@@ -1,6 +1,5 @@
 #!/bin/bash
 # =============================================================================
-# SCRIPT: 03_download_cram.pbs
 # PURPOSE: Download 20 exome CRAM files from 1000 Genomes Project via HTTPS
 # QUEUE:   serial
 # RUNTIME: ~6-8 hours (20 samples x ~5GB each = ~100GB total)
