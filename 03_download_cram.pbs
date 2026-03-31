@@ -1,0 +1,82 @@
+#!/bin/bash
+# =============================================================================
+# SCRIPT: 03_download_cram.pbs
+# PURPOSE: Download 20 exome CRAM files from 1000 Genomes Project via HTTPS
+# QUEUE:   serial
+# RUNTIME: ~6-8 hours (20 samples x ~5GB each = ~100GB total)
+# SUBMIT:  qsub 03_download_cram.pbs
+#
+# SAMPLE NOTES:
+#   - FTP port 21 is blocked by NUS HPC firewall — use HTTPS instead
+#   - Actual filename format: {SAMPLE}.alt_bwamem_GRCh38DH.20150826.{POP}.exome.cram
+#     (NOT {SAMPLE}.GRCh38DH.exome.cram as listed in some documentation)
+#   - 3 originally planned samples had no exome data and were replaced:
+#       HG02922 (GWD) → HG02461 (GWD)
+#       HG03642 (ITU) → HG03713 (ITU)
+#       HG03871 (BEB) → HG03006 (BEB)
+#
+# POPULATIONS REPRESENTED (5 superpopulations, 4 samples each):
+#   EUR: GBR (HG00096-100), CEU (NA12878/891/892), TSI (NA20502/510/518/525)
+#   AFR: YRI (NA19240), GWD (HG02461), MSL (HG03052)
+#   EAS: CHB (NA18534), JPT (NA18939)
+#   SAS: ITU (HG03713), BEB (HG03006)
+#   AMR: PUR (HG00553), CLM (HG01112)
+# =============================================================================
+#PBS -N download_cram
+#PBS -q serial
+#PBS -o /hpctmp/e1520562/PHM5004_Project/Option1_VariantCalling/logs/download_cram.log
+#PBS -e /hpctmp/e1520562/PHM5004_Project/Option1_VariantCalling/logs/download_cram.err
+#PBS -l walltime=24:00:00
+#PBS -l mem=4gb
+#PBS -l ncpus=1
+
+BASE="https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/data"
+OUT=/hpctmp/e1520562/PHM5004_Project/Option1_VariantCalling/cram
+
+mkdir -p $OUT
+
+# ── Sample manifest: SAMPLE → POPULATION and FILENAME ────────────────────────
+declare -A POP
+declare -A FNAME
+
+POP[HG00096]=GBR; FNAME[HG00096]=HG00096.alt_bwamem_GRCh38DH.20150826.GBR.exome.cram
+POP[HG00097]=GBR; FNAME[HG00097]=HG00097.alt_bwamem_GRCh38DH.20150826.GBR.exome.cram
+POP[HG00099]=GBR; FNAME[HG00099]=HG00099.alt_bwamem_GRCh38DH.20150826.GBR.exome.cram
+POP[HG00100]=GBR; FNAME[HG00100]=HG00100.alt_bwamem_GRCh38DH.20150826.GBR.exome.cram
+POP[NA12878]=CEU; FNAME[NA12878]=NA12878.alt_bwamem_GRCh38DH.20150826.CEU.exome.cram
+POP[NA12891]=CEU; FNAME[NA12891]=NA12891.alt_bwamem_GRCh38DH.20150826.CEU.exome.cram
+POP[NA12892]=CEU; FNAME[NA12892]=NA12892.alt_bwamem_GRCh38DH.20150826.CEU.exome.cram
+POP[NA19240]=YRI; FNAME[NA19240]=NA19240.alt_bwamem_GRCh38DH.20150826.YRI.exome.cram
+POP[NA18534]=CHB; FNAME[NA18534]=NA18534.alt_bwamem_GRCh38DH.20150826.CHB.exome.cram
+POP[NA18939]=JPT; FNAME[NA18939]=NA18939.alt_bwamem_GRCh38DH.20150826.JPT.exome.cram
+POP[HG00553]=PUR; FNAME[HG00553]=HG00553.alt_bwamem_GRCh38DH.20150826.PUR.exome.cram
+POP[HG01112]=CLM; FNAME[HG01112]=HG01112.alt_bwamem_GRCh38DH.20150826.CLM.exome.cram
+POP[HG02461]=GWD; FNAME[HG02461]=HG02461.alt_bwamem_GRCh38DH.20150826.GWD.exome.cram
+POP[HG03052]=MSL; FNAME[HG03052]=HG03052.alt_bwamem_GRCh38DH.20150826.MSL.exome.cram
+POP[HG03713]=ITU; FNAME[HG03713]=HG03713.alt_bwamem_GRCh38DH.20150826.ITU.exome.cram
+POP[HG03006]=BEB; FNAME[HG03006]=HG03006.alt_bwamem_GRCh38DH.20150826.BEB.exome.cram
+POP[NA20502]=TSI; FNAME[NA20502]=NA20502.alt_bwamem_GRCh38DH.20150826.TSI.exome.cram
+POP[NA20510]=TSI; FNAME[NA20510]=NA20510.alt_bwamem_GRCh38DH.20150826.TSI.exome.cram
+POP[NA20518]=TSI; FNAME[NA20518]=NA20518.alt_bwamem_GRCh38DH.20150826.TSI.exome.cram
+POP[NA20525]=TSI; FNAME[NA20525]=NA20525.alt_bwamem_GRCh38DH.20150826.TSI.exome.cram
+
+# ── Download loop ─────────────────────────────────────────────────────────────
+for SAMPLE in "${!POP[@]}"; do
+    p=${POP[$SAMPLE]}
+    f=${FNAME[$SAMPLE]}
+    echo "$(date) Downloading $SAMPLE ($p)..."
+
+    # -c = resume partial downloads if interrupted
+    wget -c "${BASE}/${p}/${SAMPLE}/exome_alignment/${f}" \
+        -O "${OUT}/${SAMPLE}.cram" 2>&1
+
+    wget -c "${BASE}/${p}/${SAMPLE}/exome_alignment/${f}.crai" \
+        -O "${OUT}/${SAMPLE}.cram.crai" 2>&1
+
+    echo "$(date) Done: $SAMPLE"
+    echo "---"
+done
+
+echo "===== All downloads complete! ====="
+echo "Final file listing:"
+ls -lh $OUT

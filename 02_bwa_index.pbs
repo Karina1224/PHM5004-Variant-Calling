@@ -1,0 +1,30 @@
+#!/bin/bash
+# =============================================================================
+# SCRIPT: 02_bwa_index.pbs
+# PURPOSE: Build BWA 0.7.17 index for hg38 reference genome
+# QUEUE:   serial
+# RUNTIME: ~2 hours (actual: 2h 9min on NUS HPC)
+# MEMORY:  8GB
+# SUBMIT:  qsub 02_bwa_index.pbs
+# NOTE:    BWA-MEM2 is NOT available on NUS HPC (system libstdc++ too old)
+#          Using BWA 0.7.17 instead. BWA-MEM2 index files (.bwt.2bit.64,
+#          .0123) are NOT compatible with BWA 0.7.17 — must rebuild index.
+# =============================================================================
+#PBS -N bwa_index
+#PBS -q serial
+#PBS -o /hpctmp/e1520562/PHM5004_Project/Option1_VariantCalling/logs/bwa_index.log
+#PBS -e /hpctmp/e1520562/PHM5004_Project/Option1_VariantCalling/logs/bwa_index.err
+#PBS -l walltime=08:00:00
+#PBS -l mem=8gb
+#PBS -l ncpus=1
+
+module load bwa/0.7.17
+
+REF=/hpctmp/e1520562/PHM5004_Project/Option1_VariantCalling/reference/hg38.fa
+
+echo "Start: $(date)"
+bwa index $REF
+echo "Done: $(date)"
+
+echo "Index files generated:"
+ls -lh ${REF}.*
