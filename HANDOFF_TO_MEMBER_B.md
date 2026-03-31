@@ -18,7 +18,7 @@
 | samtools fai | `.../reference/hg38.fa.fai` |
 | CRAM files | `.../cram/${SAMPLE_ID}.cram` |
 | Serial GVCF output | `.../output/serial/gvcf/` |
-| Parallel GVCF output | `.../output/parallel/gvcf/` ← Member B writes here |
+| Parallel GVCF output | `.../output/parallel/gvcf/` ← Perry writes here |
 | Joint genotyping output | `.../output/joint/` |
 | Logs | `.../logs/` |
 | Conda env | `source /home/svu/e1520562/miniconda3/bin/activate variant_calling` |
