@@ -1,9 +1,7 @@
-# 🧬 PHM5004 Variant Calling: Infrastructure & Preprocessing Handoff
-> **Maintainer:** Member A (Infrastructure & Serial Baseline)
-> **Handoff target:** Member B (Nextflow / Parallel Pipeline)
+# PHM5004 Variant Calling
+> **Maintainer:** Karina 
+> **Handoff target:** Perry
 > **Last updated:** 2026-03-31
-> **Compute:** NUS HPC Atlas cluster, PBS/Torque scheduler
-
 ---
 
 ## 1. Storage & Paths
@@ -194,7 +192,7 @@ params {
 
 ---
 
-## 7. Benchmark Data (for Member C)
+## 7. Benchmark Data (for Amanda)
 
 After the serial pipeline completes, timing data will be at:
 ```
