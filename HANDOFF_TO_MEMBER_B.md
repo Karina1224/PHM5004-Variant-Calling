@@ -35,11 +35,11 @@
 - [x] 20 CRAM files downloaded to `cram/` (Job 446890, ~100GB total)
 - [x] Serial pipeline script ready (`04_serial_pipeline.pbs`)
 - [ ] Serial pipeline executed on all 20 samples ← **next step**
-- [ ] Timing data handed to Member C ← **after serial run**
+- [ ] Timing data handed to Amanda ← **after serial run**
 
 ---
 
-## 3. Critical HPC Environment Notes for Member B
+## 3. Critical HPC Environment Notes for Perry
 
 ### Scheduler: PBS/Torque (NOT SLURM)
 ```bash
