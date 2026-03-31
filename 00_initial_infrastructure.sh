@@ -1,11 +1,4 @@
 #!/bin/bash
-# =============================================================================
-# SCRIPT: 00_initial_infrastructure.sh
-# PURPOSE: Initial project setup — storage migration, conda environment,
-#          reference genome indexing (captures work done on Day 0 / Mar 30)
-# RUN ON:  Login node (atlas9-c01), run directly
-# AUTHOR:  Member A (Infrastructure)
-# DATE:    2026-03-30
 #
 # WHAT THIS SCRIPT DOCUMENTS:
 #   1. Project directory structure creation
