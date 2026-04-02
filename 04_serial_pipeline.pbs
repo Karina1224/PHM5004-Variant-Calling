@@ -1,40 +1,16 @@
 #!/bin/bash
-# =============================================================================
-# PURPOSE: Run full variant calling pipeline SERIALLY on all 20 samples
-#          This is the BASELINE for benchmark comparison against parallel pipeline
-# QUEUE:   serial
-# RUNTIME: ~24-48 hours for all 20 samples
-# SUBMIT:  qsub 04_serial_pipeline.pbs
-#
-# PIPELINE STEPS (per sample):
-#   1. CRAM → FASTQ        (samtools fastq)
-#   2. Alignment            (BWA 0.7.17 mem)
-#   3. Sort + Index BAM     (samtools sort/index)
-#   4. Mark Duplicates      (GATK MarkDuplicates)
-#   5. Variant Calling      (GATK HaplotypeCaller, GVCF mode)
-#
-# OUTPUT:
-#   - Per-sample GVCF files in output/serial/gvcf/
-#   - Timing log in logs/serial_timing.log  ← used by Member C for benchmarking
-#
-# TO TEST WITH 1 SAMPLE FIRST:
-#   Change the SAMPLES array to: SAMPLES=(NA12878)
-#   Then submit, verify output, then restore all 20 samples
-# =============================================================================
 #PBS -N serial_pipeline
-#PBS -q serial
+#PBS -q parallel
 #PBS -o /hpctmp/e1520562/PHM5004_Project/Option1_VariantCalling/logs/serial_pipeline.log
 #PBS -e /hpctmp/e1520562/PHM5004_Project/Option1_VariantCalling/logs/serial_pipeline.err
 #PBS -l walltime=48:00:00
-#PBS -l mem=16gb
-#PBS -l ncpus=1
+#PBS -l mem=24gb
+#PBS -l ncpus=12
 
-# ── Load modules ──────────────────────────────────────────────────────────────
 module load samtools
 module load bwa/0.7.17
 module load gatk
 
-# ── Path configuration ────────────────────────────────────────────────────────
 BASE=/hpctmp/e1520562/PHM5004_Project/Option1_VariantCalling
 REF=$BASE/reference/hg38.fa
 CRAM_DIR=$BASE/cram
@@ -45,8 +21,6 @@ TIMING=$BASE/logs/serial_timing.log
 
 mkdir -p $FASTQ_DIR $BAM_DIR $GVCF_DIR $BASE/tmp
 
-# ── Sample list ───────────────────────────────────────────────────────────────
-# NOTE: HG02922→HG02461, HG03642→HG03713, HG03871→HG03006 (no exome data available)
 SAMPLES=(
     HG00096 HG00097 HG00099 HG00100
     NA12878 NA12891 NA12892 NA19240
@@ -55,95 +29,74 @@ SAMPLES=(
     NA20502 NA20510 NA20518 NA20525
 )
 
-# ── Record total start time ───────────────────────────────────────────────────
 TOTAL_START=$(date +%s)
 echo "============================================" >  $TIMING
 echo "Serial Pipeline Start: $(date)"              >> $TIMING
 echo "Samples: ${#SAMPLES[@]}"                     >> $TIMING
 echo "============================================" >> $TIMING
 
-# ── Process each sample sequentially ─────────────────────────────────────────
 for SAMPLE in "${SAMPLES[@]}"; do
-
     echo "" | tee -a $TIMING
     echo ">>> [$SAMPLE] Start: $(date)" | tee -a $TIMING
     SAMPLE_START=$(date +%s)
 
-    # ── Step 1: CRAM → FASTQ ─────────────────────────────────────────────────
     echo "  [1/5] CRAM to FASTQ" | tee -a $TIMING
     S1=$(date +%s)
-
     samtools fastq \
         -1 $FASTQ_DIR/${SAMPLE}_R1.fq.gz \
         -2 $FASTQ_DIR/${SAMPLE}_R2.fq.gz \
         -0 /dev/null -s /dev/null -n \
+        --reference $REF \
         $CRAM_DIR/${SAMPLE}.cram
-
     echo "  Step 1 done: $(($(date +%s)-S1))s" | tee -a $TIMING
 
-    # ── Step 2: BWA MEM alignment ─────────────────────────────────────────────
     echo "  [2/5] BWA alignment + SAMtools sort" | tee -a $TIMING
     S2=$(date +%s)
-
     bwa mem \
         -R "@RG\tID:${SAMPLE}\tSM:${SAMPLE}\tPL:ILLUMINA\tLB:lib1\tPU:unit1" \
         $REF \
         $FASTQ_DIR/${SAMPLE}_R1.fq.gz \
         $FASTQ_DIR/${SAMPLE}_R2.fq.gz \
         | samtools sort -o $BAM_DIR/${SAMPLE}.sorted.bam
-
     echo "  Step 2 done: $(($(date +%s)-S2))s" | tee -a $TIMING
 
-    # ── Step 3: Index BAM ─────────────────────────────────────────────────────
     echo "  [3/5] Index BAM" | tee -a $TIMING
     samtools index $BAM_DIR/${SAMPLE}.sorted.bam
 
-    # ── Step 4: Mark Duplicates ───────────────────────────────────────────────
     echo "  [4/5] MarkDuplicates" | tee -a $TIMING
     S4=$(date +%s)
-
     gatk MarkDuplicates \
         -I $BAM_DIR/${SAMPLE}.sorted.bam \
         -O $BAM_DIR/${SAMPLE}.markdup.bam \
         -M $BAM_DIR/${SAMPLE}.markdup.metrics \
         --REMOVE_DUPLICATES false \
         --TMP_DIR $BASE/tmp
-
     samtools index $BAM_DIR/${SAMPLE}.markdup.bam
-
     echo "  Step 4 done: $(($(date +%s)-S4))s" | tee -a $TIMING
 
-    # ── Step 5: GATK HaplotypeCaller (GVCF mode) ─────────────────────────────
     echo "  [5/5] HaplotypeCaller (GVCF)" | tee -a $TIMING
     S5=$(date +%s)
-
     gatk HaplotypeCaller \
         -R $REF \
         -I $BAM_DIR/${SAMPLE}.markdup.bam \
         -O $GVCF_DIR/${SAMPLE}.g.vcf.gz \
         -ERC GVCF \
-        --tmp-dir $BASE/tmp
-
+        --TMP_DIR $BASE/tmp
     echo "  Step 5 done: $(($(date +%s)-S5))s" | tee -a $TIMING
 
-    # ── Per-sample total time ─────────────────────────────────────────────────
     SAMPLE_ELAPSED=$(($(date +%s)-SAMPLE_START))
     echo "  >>> [$SAMPLE] TOTAL: ${SAMPLE_ELAPSED}s ($(date -d@$SAMPLE_ELAPSED -u +%H:%M:%S))" \
         | tee -a $TIMING
 
-    # ── Clean up FASTQ to save disk space ────────────────────────────────────
-    rm -f $FASTQ_DIR/${SAMPLE}_R1.fq.gz \
-          $FASTQ_DIR/${SAMPLE}_R2.fq.gz
-
+    rm -f $FASTQ_DIR/${SAMPLE}_R1.fq.gz $FASTQ_DIR/${SAMPLE}_R2.fq.gz
 done
 
-# ── Total pipeline time ───────────────────────────────────────────────────────
 TOTAL=$(($(date +%s)-TOTAL_START))
-echo ""                                                              | tee -a $TIMING
-echo "============================================"                  | tee -a $TIMING
-echo "All 20 samples complete: $(date)"                             | tee -a $TIMING
+echo "" | tee -a $TIMING
+echo "============================================" | tee -a $TIMING
+echo "All 20 samples complete: $(date)" | tee -a $TIMING
 echo "TOTAL SERIAL TIME: ${TOTAL}s ($(date -d@$TOTAL -u +%H:%M:%S))" | tee -a $TIMING
-echo "============================================"                  | tee -a $TIMING
+echo "============================================" | tee -a $TIMING
 
-echo "GVCF files produced:"
+echo "GVCF output:"
 ls -lh $GVCF_DIR/
