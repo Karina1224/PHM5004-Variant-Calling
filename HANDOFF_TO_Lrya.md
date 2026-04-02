@@ -1,8 +1,6 @@
 # PHM5004 — VCF Analysis Handoff
-## To: Member D (Data Analyst — Variant Statistics)
-## From: Member A (Serial Baseline)
-## Date: 2026-04-02
-
+## To: Lrya
+## From:Karina
 ---
 
 ## What You Have Access To
