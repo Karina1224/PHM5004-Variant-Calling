@@ -1,7 +1,6 @@
 # PHM5004 — Infrastructure & Serial Baseline Handoff
-## To: Perry (Member B — Nextflow Parallel Pipeline)
-## From: Member A
-## Date: 2026-04-02
+## To: Perry 
+## From: Karina
 
 ---
 
