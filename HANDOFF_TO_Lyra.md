@@ -1,8 +1,6 @@
 # PHM5004 — VCF Analysis Handoff
-## To: Irya (Member D — Data Analyst, Variant Statistics)
-## From: Member A
-## Date: 2026-04-02
-
+## To: Lyra
+## From:Karina
 ---
 
 ## ✅ What's Already Done for You
@@ -117,23 +115,23 @@ status = "PASS" if abs(titv_ratio - EXPECTED_TITV) <= TITV_TOLERANCE else "FAIL"
 
 ## 📤 What to Send the Group When Done
 
-### → Amanda (Member C)
+### → Amanda
 The **3 PNG figures** — she'll add them to the benchmark slides.
 
-### → Member E (Scientific Writer)
+### → summer
 These **4 numbers** for Results/Interpretation:
 - Mean SNPs per sample
 - Mean indels per sample
 - Mean Ti/Tv ratio (vs expected 2.8)
 - How many samples PASS (e.g. "19/20")
 
-**Template sentence for E to use:**
+**Template sentence for summer to use:**
 > *"Across 20 exome samples, a mean of X,XXX SNPs and X,XXX indels were identified
 > per sample. The mean Ti/Tv ratio of X.XX is consistent with the expected value of
 > 2.8 for exome sequencing (1000 Genomes Project Consortium, 2015), with X/20 samples
 > falling within the acceptable range, confirming pipeline accuracy."*
 
-### → Member F (PPT Lead)
+### → xida
 The **3 figures** + this 2-line slide caption:
 > *"All 20 variant call sets validated against published 1000 Genomes statistics.
 > Mean Ti/Tv = X.XX (expected ~2.8). Results confirm pipeline accuracy."*
