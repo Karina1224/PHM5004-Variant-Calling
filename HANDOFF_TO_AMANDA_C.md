@@ -1,7 +1,6 @@
 # PHM5004 — Benchmark Data Handoff
-## To: Amanda (Member C — Data Analyst)
-## From: Member A (Serial Baseline)
-## Date: 2026-04-02
+## To: Amanda 
+## From: Karina
 
 ---
 
