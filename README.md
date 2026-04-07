@@ -128,3 +128,20 @@ module load gatk          # 4.0.2.1
 | 447275 | serial_test_1sample.pbs | serial | ❌ OOM killed | — |
 | 447311 | serial_test_1sample.pbs | parallel | ✅ Exit 0 | 51min |
 | 447XXX | serial_pipeline.pbs | parallel | ✅ Exit 0 | 16h 25min |
+
+cat >> /hpctmp/e1520562/PHM5004_Project/Option1_VariantCalling/README.md << 'EOF'
+
+## Step-level Timing Summary (Serial, 20 samples total)
+
+| Step | Total Time | % of Runtime |
+|------|-----------|-------------|
+| CRAM → FASTQ | 1,327s (22m 7s) | 2.2% |
+| BWA Align | 3,325s (55m 25s) | 5.6% |
+| MarkDuplicates | 784s (13m 4s) | 1.3% |
+| HaplotypeCaller | 53,712s (14h 55m) | 90.9% |
+| **Total (20 samples)** | **59,100s (16h 25m)** | 100% |
+
+**Key insight:** HaplotypeCaller accounts for 90.9% of total runtime
+— the primary target for parallelisation.
+Amdahl's Law theoretical max speedup: **11.0×**
+EOF
